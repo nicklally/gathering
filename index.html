@@ -21,31 +21,25 @@
 <div id="nav">gathering</div>
 
 <div id="map">
-  <div class="leaflet-control-container">
-    <div class="leaflet-top leaflet-right">
-      <div id="controls" class="leaflet-bar leaflet-control">
-        <input id="query-textfield" value="building" size="250">
-        <input id="query-button" type="button" value="Search OSM">
-      </div>
-    </div>
+  
 </div>
 </div>
 
 <div id="menuEdit" class="menu">
   <header>TOOLS</header>
 
+  <input id="query-textfield" value="building" size="250">
+  <input id="query-button" type="button" value="Search OSM" onclick="OSMquery();">
 
+<br /><br />
   <button title="Export linestring of transformations" onclick="downloadSVG();">Export SVG</button><br />
 </div>
 
-<!--remove jquery-->
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="https://unpkg.com/osmtogeojson@2.2.12/osmtogeojson.js"></script>
 <script src="js/geojson2svg.min.js"></script>
 <script src="js/parse-svg.min.js"></script>
 
 <script language="javascript" type="text/javascript" src="js/gathering.js"></script>
-<script language="javascript" type="text/javascript" src="js/gatheringUI.js"></script>
 
 </body>
 </html>

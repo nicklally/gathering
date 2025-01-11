@@ -17,12 +17,13 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         return resultUrl;
       }
 
-      $("#query-button").click(function () {
-        var queryTextfieldValue = $("#query-textfield").val();
+      async function OSMquery () {
+        var queryTextfieldValue = document.getElementById("query-textfield").value;
         var overpassApiUrl = buildOverpassApiUrl(map, queryTextfieldValue);
      // replace jquery https://youmightnotneedjquery.com/   
-        $.get(overpassApiUrl, function (osmDataAsJson) {
-          resultAsGeojson = osmtogeojson(osmDataAsJson);
+        const response = await fetch(overpassApiUrl);
+        const osmDataJson = await response.json();
+          resultAsGeojson = osmtogeojson(osmDataJson);
           //console.log(resultAsGeojson);
           var resultLayer = L.geoJson(resultAsGeojson, {
             style: function (feature) {
@@ -46,8 +47,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
               layer.bindPopup(popupContent);
             }
           }).addTo(map);
-        });
-      });
+      };
 
       function downloadSVG(){
         console.log(resultAsGeojson);
