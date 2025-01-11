@@ -90,3 +90,13 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         element.remove();
       }
 
+function lockMap(obj){
+    if(!obj.checked){
+        map.dragging.enable();
+        map.scrollWheelZoom.enable();
+    } else {
+        map.dragging.disable(); 
+        map.scrollWheelZoom.disable();
+    }
+};
+    
