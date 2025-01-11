@@ -51,7 +51,23 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
       function downloadSVG(){
         console.log(resultAsGeojson);
-        var converter = new GeoJSON2SVG();
+        var svgOptions = new Object();
+        //svgOptions.mapExtent = "left: " + map.getBounds().getWest() + ", bottom: " + map.getBounds().getSouth() + ", right: " + map.getBounds().getEast() + ", top: " + map.getBounds().getNorth();
+        //svgOptions.vpSize = "width: " + document.getElementById("map").offsetWidth + ", height: " + document.getElementById("map").offsetHeight;
+        //console.log(svgOptions);
+        var mapExtents = new Object();
+            mapExtents.left = map.getBounds().getWest();
+            mapExtents.bottom = map.getBounds().getSouth();
+            mapExtents.right = map.getBounds().getEast(); 
+            mapExtents.top = map.getBounds().getNorth();
+        svgOptions.mapExtent = mapExtents;
+        var vpSize = new Object();
+            vpSize.width = document.getElementById("map").offsetWidth;
+            vpSize.height = document.getElementById("map").offsetHeight;
+        svgOptions.viewportSize = vpSize;
+        
+        console.log(svgOptions);
+        var converter = new GeoJSON2SVG(svgOptions);
         var svgConv = converter.convert(resultAsGeojson);
 
         var mapW = document.getElementById("map").offsetWidth;
