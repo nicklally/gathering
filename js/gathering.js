@@ -23,6 +23,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
      // replace jquery https://youmightnotneedjquery.com/   
         const response = await fetch(overpassApiUrl);
         const osmDataJson = await response.json();
+        console.log(osmDataJson);
           resultAsGeojson = osmtogeojson(osmDataJson);
           //console.log(resultAsGeojson);
           var resultLayer = L.geoJson(resultAsGeojson, {
@@ -50,17 +51,20 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       };
 
       function downloadSVG(){
-        console.log(resultAsGeojson);
+        //console.log(resultAsGeojson);
+        var resultAsGeojsonProj = reproject(resultAsGeojson);
+
+        //console.log(resultAsGeojsonProj);
         var svgOptions = new Object();
         //svgOptions.mapExtent = "left: " + map.getBounds().getWest() + ", bottom: " + map.getBounds().getSouth() + ", right: " + map.getBounds().getEast() + ", top: " + map.getBounds().getNorth();
         //svgOptions.vpSize = "width: " + document.getElementById("map").offsetWidth + ", height: " + document.getElementById("map").offsetHeight;
         //console.log(svgOptions);
-        var mapExtents = new Object();
+        /* var mapExtents = new Object();
             mapExtents.left = map.getBounds().getWest();
             mapExtents.bottom = map.getBounds().getSouth();
             mapExtents.right = map.getBounds().getEast(); 
             mapExtents.top = map.getBounds().getNorth();
-        svgOptions.mapExtent = mapExtents;
+        svgOptions.mapExtent = mapExtents; */
         var vpSize = new Object();
             vpSize.width = document.getElementById("map").offsetWidth;
             vpSize.height = document.getElementById("map").offsetHeight;
@@ -68,12 +72,12 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         
         console.log(svgOptions);
         var converter = new GeoJSON2SVG(svgOptions);
-        var svgConv = converter.convert(resultAsGeojson);
+        var svgConv = converter.convert(resultAsGeojsonProj);
 
         var mapW = document.getElementById("map").offsetWidth;
         var mapH = document.getElementById("map").offsetHeight;
         
-        var svgPre = "<svg version=\"1.1\" width=\"" + mapW + "\" height=\"" + mapH + "\" xmlns=\"http://www.w3.org/2000/svg\"><style>path{fill: none;stroke:gray;stroke-width:1px;}</style>"
+        var svgPre = "<svg version=\"1.1\" width=\"" + mapW + "\" height=\"" + mapH + "\" xmlns=\"http://www.w3.org/2000/svg\"><style>path{fill: none;stroke:gray;stroke-width:0.5px;}</style>"
         var svgPost = "</svg>";
         svgOut = svgPre + svgConv + svgPost; 
         console.log(svgOut);
