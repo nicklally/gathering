@@ -1,4 +1,4 @@
-var map = L.map('map').setView([40.328577, -105.162627], 18);
+var map = L.map('map').setView([40.394783, -105.075581], 18);
 var resultAsGeojson;
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
