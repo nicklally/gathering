@@ -27,7 +27,7 @@ button:disabled {
   transition-duration: 0.4s;
   margin:5px 5px;color:#ddd;}
 #nav .button:hover {color: white;}
-#nav #goInterface{margin-left:150px;background-color:#666;}
+#nav #goData{margin-left:150px;background-color:#333;}
 
 /*menu*/
 .menu{
@@ -132,8 +132,7 @@ button:disabled {
 }
 
 /*main section*/
-/*#leftCanv{width:80%;height:400px;float:left;}*/
-#rightCanv{width:80%;height:400px;float:left;display: none;}
 #dataResults{font-size:10px;color:#999;margin-top:350px;width:200px;float:left;}
 
-#map{width:80%;height:600px;float:left;margin-top:18px}
+#map{width:80%;height:600px;float:left;margin-top:35px}
+#sketch{width:80%;height:600px;float:left;margin-top:35px; display: none;}

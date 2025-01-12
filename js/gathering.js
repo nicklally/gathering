@@ -23,7 +23,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
      // replace jquery https://youmightnotneedjquery.com/   
         const response = await fetch(overpassApiUrl);
         const osmDataJson = await response.json();
-        console.log(osmDataJson);
+        //console.log(osmDataJson);
           resultAsGeojson = osmtogeojson(osmDataJson);
           //console.log(resultAsGeojson);
           var resultLayer = L.geoJson(resultAsGeojson, {
@@ -54,7 +54,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         //console.log(resultAsGeojson);
         var resultAsGeojsonProj = reproject(resultAsGeojson);
 
-        //console.log(resultAsGeojsonProj);
+        console.log(resultAsGeojsonProj);
         var svgOptions = new Object();
         //svgOptions.mapExtent = "left: " + map.getBounds().getWest() + ", bottom: " + map.getBounds().getSouth() + ", right: " + map.getBounds().getEast() + ", top: " + map.getBounds().getNorth();
         //svgOptions.vpSize = "width: " + document.getElementById("map").offsetWidth + ", height: " + document.getElementById("map").offsetHeight;
@@ -70,7 +70,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             vpSize.height = document.getElementById("map").offsetHeight;
         svgOptions.viewportSize = vpSize;
         
-        console.log(svgOptions);
+        //console.log(svgOptions);
         var converter = new GeoJSON2SVG(svgOptions);
         var svgConv = converter.convert(resultAsGeojsonProj);
 
@@ -80,7 +80,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         var svgPre = "<svg version=\"1.1\" width=\"" + mapW + "\" height=\"" + mapH + "\" xmlns=\"http://www.w3.org/2000/svg\"><style>path{fill: none;stroke:gray;stroke-width:0.5px;}</style>"
         var svgPost = "</svg>";
         svgOut = svgPre + svgConv + svgPost; 
-        console.log(svgOut);
+        //console.log(svgOut);
 
         const blob = new Blob([svgOut.toString()]);
         const element = document.createElement("a");
@@ -99,4 +99,24 @@ function lockMap(obj){
         map.scrollWheelZoom.disable();
     }
 };
-    
+
+// PROCESSING SKETCH CODE
+//new p5();
+
+const s = ( p ) => {
+
+    let x = 100; 
+    let y = 100;
+  
+    p.setup = function() {
+      p.createCanvas(document.getElementById("map").offsetWidth,document.getElementById("map").offsetHeight);
+    };
+  
+    p.draw = function() {
+      p.background(0);
+      p.fill(255);
+      p.rect(x,y,50,50);
+    };
+  };
+  
+  let myp5 = new p5(s, "sketch");

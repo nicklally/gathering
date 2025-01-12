@@ -12,12 +12,13 @@
 </style>
 </head>
 <body>
-<div id="nav">gathering</div>
+<div id="nav">gathering
+  <button title="Collect Data" id="goMap" class="button" onclick="goMap()" style="margin-left:100px">DATA</button>
+  <button title="Interact" id="goSketch" class="button" onclick="goSketch()">INTERACT</button>
+</div>
 
-<div id="map">
-  
-</div>
-</div>
+<div id="map"></div>
+<div id="sketch"></div>
 
 <div id="menuEdit" class="menu">
   <header>TOOLS</header>
@@ -29,7 +30,7 @@
   <button title="Download SVG" onclick="downloadSVG();">Export SVG</button><br />
 
   <br /><br />
-  
+
   <input type="checkbox" name="lock" onchange="lockMap(this)" unchecked>Lock map
   <br /><br />
 
@@ -39,8 +40,10 @@
 <script src="js/geojson2svg.min.js"></script>
 <script src="js/parse-svg.min.js"></script>
 <script src="js/reproject-spherical-mercator.min.js"></script>
+<script src="js/p5.min.js"></script>
 
 <script language="javascript" type="text/javascript" src="js/gathering.js"></script>
+<script language="javascript" type="text/javascript" src="js/gatheringUI.js"></script>
 
 </body>
 </html>
