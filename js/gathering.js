@@ -1,6 +1,7 @@
 var map = L.map('map').setView([40.394783, -105.075581], 18);
 var resultAsGeojson;
 var shapeArr = [];
+var fill = true; 
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -60,12 +61,42 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         //svgOptions.mapExtent = "left: " + map.getBounds().getWest() + ", bottom: " + map.getBounds().getSouth() + ", right: " + map.getBounds().getEast() + ", top: " + map.getBounds().getNorth();
         //svgOptions.vpSize = "width: " + document.getElementById("map").offsetWidth + ", height: " + document.getElementById("map").offsetHeight;
         //console.log(svgOptions);
-        /* var mapExtents = new Object();
-            mapExtents.left = map.getBounds().getWest();
-            mapExtents.bottom = map.getBounds().getSouth();
-            mapExtents.right = map.getBounds().getEast(); 
-            mapExtents.top = map.getBounds().getNorth();
-        svgOptions.mapExtent = mapExtents; */
+
+        //load bounds into a geojson only to reproject—needs clean up 
+    var gsEx = 
+    {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "coordinates": [],
+              "type": "Point"
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "coordinates": [],
+              "type": "Point"
+            }
+          }
+        ]
+      }
+
+    gsEx.features[0].geometry.coordinates = [map.getBounds().getWest(),map.getBounds().getSouth()];
+    gsEx.features[1].geometry.coordinates = [map.getBounds().getEast(),map.getBounds().getNorth()];
+    var gsEx2 = reproject(gsEx);
+
+        var mapExtents = new Object();
+            mapExtents.left = gsEx2.features[0].geometry.coordinates[0];
+            mapExtents.bottom = gsEx2.features[0].geometry.coordinates[1];
+            mapExtents.right = gsEx2.features[1].geometry.coordinates[0]; 
+            mapExtents.top = gsEx2.features[1].geometry.coordinates[1];
+        svgOptions.mapExtent = mapExtents; 
+        console.log(mapExtents);
         var vpSize = new Object();
             vpSize.width = document.getElementById("map").offsetWidth;
             vpSize.height = document.getElementById("map").offsetHeight;
@@ -151,15 +182,31 @@ function loadP5(){
 
     for (var i = 0; i < resultAsGeojsonProj.features.length; i++){
         var shapeCoords =[];
-        for (var j = 0; j < resultAsGeojsonProj.features[i].geometry.coordinates.length; j++){
-           var coords = resultAsGeojsonProj.features[i].geometry.coordinates[j];
-            for (var c = 0; c < coords.length; c++){
-                //add coordinates in pairs to array, translating to pixels
-                shapeCoords.push(((coords[c][0]-mw)/widthMeters)*pw);
-                shapeCoords.push(ph-((coords[c][1]-ms)/heightMeters)*ph);
-            }
-        }
+        if(resultAsGeojsonProj.features[i].geometry.type === "Polygon"){
+            fill = true;
+            for (let j = 0; j < resultAsGeojsonProj.features[i].geometry.coordinates.length; j++){
+            let coords = resultAsGeojsonProj.features[i].geometry.coordinates[j];
+                for (let c = 0; c < coords.length; c++){
+                    //add coordinates in pairs to array, translating to pixels
+                    shapeCoords.push(((coords[c][0]-mw)/widthMeters)*pw);
+                    shapeCoords.push(ph-((coords[c][1]-ms)/heightMeters)*ph);
+                };
+            };
+        };
+        //console.log(resultAsGeojsonProj.features);
+        if (resultAsGeojsonProj.features[i].geometry.type === "LineString"){
+            fill = false; 
+            for (let j = 0; j < resultAsGeojsonProj.features[i].geometry.coordinates.length; j++){
+                let coords = resultAsGeojsonProj.features[i].geometry.coordinates[j];
+                    for (let c = 0; c < coords.length; c+=2){
+                        //add coordinates in pairs to array, translating to pixels
+                        shapeCoords.push(((coords[c]-mw)/widthMeters)*pw);
+                        shapeCoords.push(ph-((coords[c+1]-ms)/heightMeters)*ph);
+                    };
+                };
+        };
         //each shapeCoords array is a shape in shapeArr
+       // console.log(shapeCoords);
         shapeArr.push(shapeCoords);
     }
 }
@@ -183,6 +230,11 @@ const s = ( p ) => {
         for (var i = 0; i < shapes.length; i++){
             p.stroke("red");
            p.beginShape();
+           if(fill){
+                p.fill('#fff');
+            }else {
+                p.noFill();
+           };
             for (var j = 0; j< shapes[i].length; j+=2){
                 //shapes[i][j] += p.random(-0.2,0.2);
                 //shapes[i][j+1] += p.random(-0.2,0.2);
@@ -196,7 +248,7 @@ const s = ( p ) => {
 
     p.mouseReleased = function (){
         expand(1);
-        console.log("clicked");
+        //console.log("clicked");
     }
 
     function expand(sign){ //positive sign = expand, negative = contract
