@@ -154,7 +154,7 @@ function loadP5(){
         for (var j = 0; j < resultAsGeojsonProj.features[i].geometry.coordinates.length; j++){
            var coords = resultAsGeojsonProj.features[i].geometry.coordinates[j];
             for (var c = 0; c < coords.length; c++){
-                //add coordinates in pairs to array
+                //add coordinates in pairs to array, translating to pixels
                 shapeCoords.push(((coords[c][0]-mw)/widthMeters)*pw);
                 shapeCoords.push(ph-((coords[c][1]-ms)/heightMeters)*ph);
             }
@@ -166,9 +166,6 @@ function loadP5(){
 
 // PROCESSING SKETCH CODE
 const s = ( p ) => {
-
-    let x = 100; 
-    let y = 100;
   
     p.setup = function() {
       p.createCanvas(document.getElementById("map").offsetWidth,document.getElementById("map").offsetHeight);
@@ -177,9 +174,6 @@ const s = ( p ) => {
     p.draw = function() {
       p.background(0);
       p.fill(255);
-      /* p.rect(x,y,50,50);
-      x += p.random(-0.5,0.5);
-      y += p.random(-0.5,0.5); */
       if(shapeArr){
         drawShapes(shapeArr);
       };
@@ -199,6 +193,35 @@ const s = ( p ) => {
             //console.log("close shape");
         };
     };
+
+    p.mouseReleased = function (){
+        expand(1);
+        console.log("clicked");
+    }
+
+    function expand(sign){ //positive sign = expand, negative = contract
+        var exMag = 10;
+        var exRad = 150;
+        for (var i = 0; i < shapeArr.length; i++){
+            for (var j = 0; j< shapeArr[i].length; j+=2){
+                if (p.dist(p.mouseX, p.mouseY, shapeArr[i][j], shapeArr[i][j+1]) < exRad){
+                    let dir = p.createVector(shapeArr[i][j], shapeArr[i][j+1]);
+                    let origin = p.createVector(p.mouseX,p.mouseY);
+                    let distance = p.constructor.Vector.dist(origin, dir);
+                    dir = p.constructor.Vector.sub(origin, dir);
+                    dir = p.constructor.Vector.normalize(dir);
+                   //console.log(dir);
+                    //console.log(p.sin(distance/exRad*180)*exMag*sign);
+                   dir.x *= p.sin(distance/exRad*180)*exMag*sign; 
+                   dir.y *= p.sin(distance/exRad*180)*exMag*sign; 
+                   // dir = p.constructor.Vector.mult(p.sin(distance/exRad*180)*exMag*sign,dir);
+                    //console.log(dir); 
+                    shapeArr[i][j] += dir.x;
+                    shapeArr[i][j+1] += dir.y;
+                };
+          };
+        };
+      };
   };
   
   let myp5 = new p5(s, "sketch");
