@@ -104,6 +104,56 @@ function lockMap(obj){
 function loadP5(){
     shapeArr = [];
     var resultAsGeojsonProj = reproject(resultAsGeojson);
+    
+    var ms = map.getBounds().getSouth();
+    var mw = map.getBounds().getWest();
+    var mn = map.getBounds().getNorth();
+    var me = map.getBounds().getEast();
+    var pw = document.getElementById("sketch").offsetWidth;
+    var ph = document.getElementById("sketch").offsetHeight; 
+
+    //console.log(mw);
+    //load bounds into a geojson only to reproject—needs clean up 
+    var gs = 
+    {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "coordinates": [],
+              "type": "Point"
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "coordinates": [],
+              "type": "Point"
+            }
+          }
+        ]
+      }
+
+    gs.features[0].geometry.coordinates = [mw,ms];
+    gs.features[1].geometry.coordinates = [me,mn];
+
+    //geojson.features[1].geometry.coordinates.push([mn, me]);
+    gs2 = reproject(gs);
+    mw = gs2.features[0].geometry.coordinates[0];
+    ms = gs2.features[0].geometry.coordinates[1];
+    me = gs2.features[1].geometry.coordinates[0];
+    mn = gs2.features[1].geometry.coordinates[1];
+    // console.log(geojson.features[1].geometry.coordinates );
+
+    //scaling calculations
+    var widthMeters = me - mw; 
+    //console.log(widthMeters);
+    var heightMeters = mn - ms; 
+    //console.log(heightMeters);
+
     //console.log(resultAsGeojsonProj);
     //console.log(resultAsGeojsonProj.features.length);
 
@@ -111,11 +161,10 @@ function loadP5(){
         var shapeCoords =[];
         for (var j = 0; j < resultAsGeojsonProj.features[i].geometry.coordinates.length; j++){
            var coords = resultAsGeojsonProj.features[i].geometry.coordinates[j];
-            for (c in coords){
+            for (var c = 0; c < coords.length; c++){
                 //add coordinates in pairs to array
-                shapeCoords.push(coords[c][0]+11696923);
-                shapeCoords.push(coords[c][1]-4923215);
-                console.log(coords[c][1]-4923015);
+                shapeCoords.push(((coords[c][0]-mw)/widthMeters)*pw);
+                shapeCoords.push(ph-((coords[c][1]-ms)/heightMeters)*ph);
             }
         }
         //each shapeCoords array is a shape in shapeArr
