@@ -2,7 +2,7 @@
 
 Live demo (in progress): https://nicklally.github.io/gathering/
 
-Begin by using the search engine to query OpenStreetMap features. Some sample queries: 
+Begin by using the search to query OpenStreetMap features. Some sample queries: 
 
     * building
     * highway
