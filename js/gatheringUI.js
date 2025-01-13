@@ -15,6 +15,7 @@ function goSketch(){
 	//document.getElementById("menuRender").style.display = "block";
 	document.getElementById("goMap").style.backgroundColor = "#333";
 	document.getElementById("goSketch").style.backgroundColor = "#666";
+    loadP5();
 	//editMode = false;
 }
 

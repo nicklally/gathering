@@ -27,7 +27,7 @@ button:disabled {
   transition-duration: 0.4s;
   margin:5px 5px;color:#ddd;}
 #nav .button:hover {color: white;}
-#nav #goData{margin-left:150px;background-color:#333;}
+#nav #goData{margin-left:150px;background: color #666;;}
 
 /*menu*/
 .menu{

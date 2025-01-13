@@ -1,5 +1,6 @@
 var map = L.map('map').setView([40.394783, -105.075581], 18);
 var resultAsGeojson;
+var shapeArr = [];
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -31,11 +32,11 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
               return {color: "#ff0000"};
             },
             filter: function (feature, layer) {
-              var isPolygon = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon");
+              var isPolygon = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon") || (feature.geometry.type === "LineString");
               if (isPolygon) {
-               //return true;
+               return true;
               }
-              return true;
+              //return true;
             },
             onEachFeature: function (feature, layer) {
               var popupContent = "";
@@ -54,7 +55,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         //console.log(resultAsGeojson);
         var resultAsGeojsonProj = reproject(resultAsGeojson);
 
-        console.log(resultAsGeojsonProj);
+        //console.log(resultAsGeojsonProj);
         var svgOptions = new Object();
         //svgOptions.mapExtent = "left: " + map.getBounds().getWest() + ", bottom: " + map.getBounds().getSouth() + ", right: " + map.getBounds().getEast() + ", top: " + map.getBounds().getNorth();
         //svgOptions.vpSize = "width: " + document.getElementById("map").offsetWidth + ", height: " + document.getElementById("map").offsetHeight;
@@ -100,9 +101,31 @@ function lockMap(obj){
     }
 };
 
-// PROCESSING SKETCH CODE
-//new p5();
+function loadP5(){
+    shapeArr = [];
+    var resultAsGeojsonProj = reproject(resultAsGeojson);
+    //console.log(resultAsGeojsonProj);
+    //console.log(resultAsGeojsonProj.features.length);
 
+    for (var i = 0; i < resultAsGeojsonProj.features.length; i++){
+        var shapeCoords =[];
+        for (var j = 0; j < resultAsGeojsonProj.features[i].geometry.coordinates.length; j++){
+           var coords = resultAsGeojsonProj.features[i].geometry.coordinates[j];
+            for (c in coords){
+                //add coordinates in pairs to array
+                shapeCoords.push(coords[c][0]+11696923);
+                shapeCoords.push(coords[c][1]-4923215);
+                console.log(coords[c][1]-4923015);
+            }
+        }
+        //each shapeCoords array is a shape in shapeArr
+        shapeArr.push(shapeCoords);
+    }
+    //console.log(shapeArr);
+    //drawShapes(shapeArr);
+}
+
+// PROCESSING SKETCH CODE
 const s = ( p ) => {
 
     let x = 100; 
@@ -111,12 +134,32 @@ const s = ( p ) => {
     p.setup = function() {
       p.createCanvas(document.getElementById("map").offsetWidth,document.getElementById("map").offsetHeight);
     };
-  
+
     p.draw = function() {
       p.background(0);
       p.fill(255);
       p.rect(x,y,50,50);
+      x += p.random(-0.5,0.5);
+      y += p.random(-0.5,0.5);
+      if(shapeArr){
+        drawShapes(shapeArr);
+      };
+    };
+
+    function drawShapes(shapes){
+        for (var i = 0; i < shapes.length; i++){
+            p.stroke("red");
+           p.beginShape();
+            for (var j = 0; j< shapes[i].length; j+=2){
+                p.vertex(shapes[i][j],shapes[i][j+1]);
+                //console.log(shapes[i][j] + ' ' + shapes[i][j+1]);
+            }
+            p.endShape(p.CLOSE);
+            //console.log("close shape");
+        };
     };
   };
   
   let myp5 = new p5(s, "sketch");
+
+  
