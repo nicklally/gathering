@@ -112,7 +112,6 @@ function loadP5(){
     var pw = document.getElementById("sketch").offsetWidth;
     var ph = document.getElementById("sketch").offsetHeight; 
 
-    //console.log(mw);
     //load bounds into a geojson only to reproject—needs clean up 
     var gs = 
     {
@@ -140,22 +139,15 @@ function loadP5(){
     gs.features[0].geometry.coordinates = [mw,ms];
     gs.features[1].geometry.coordinates = [me,mn];
 
-    //geojson.features[1].geometry.coordinates.push([mn, me]);
     gs2 = reproject(gs);
     mw = gs2.features[0].geometry.coordinates[0];
     ms = gs2.features[0].geometry.coordinates[1];
     me = gs2.features[1].geometry.coordinates[0];
     mn = gs2.features[1].geometry.coordinates[1];
-    // console.log(geojson.features[1].geometry.coordinates );
 
     //scaling calculations
     var widthMeters = me - mw; 
-    //console.log(widthMeters);
     var heightMeters = mn - ms; 
-    //console.log(heightMeters);
-
-    //console.log(resultAsGeojsonProj);
-    //console.log(resultAsGeojsonProj.features.length);
 
     for (var i = 0; i < resultAsGeojsonProj.features.length; i++){
         var shapeCoords =[];
@@ -170,8 +162,6 @@ function loadP5(){
         //each shapeCoords array is a shape in shapeArr
         shapeArr.push(shapeCoords);
     }
-    //console.log(shapeArr);
-    //drawShapes(shapeArr);
 }
 
 // PROCESSING SKETCH CODE
@@ -187,9 +177,9 @@ const s = ( p ) => {
     p.draw = function() {
       p.background(0);
       p.fill(255);
-      p.rect(x,y,50,50);
+      /* p.rect(x,y,50,50);
       x += p.random(-0.5,0.5);
-      y += p.random(-0.5,0.5);
+      y += p.random(-0.5,0.5); */
       if(shapeArr){
         drawShapes(shapeArr);
       };
@@ -200,6 +190,8 @@ const s = ( p ) => {
             p.stroke("red");
            p.beginShape();
             for (var j = 0; j< shapes[i].length; j+=2){
+                //shapes[i][j] += p.random(-0.2,0.2);
+                //shapes[i][j+1] += p.random(-0.2,0.2);
                 p.vertex(shapes[i][j],shapes[i][j+1]);
                 //console.log(shapes[i][j] + ' ' + shapes[i][j+1]);
             }
@@ -210,5 +202,3 @@ const s = ( p ) => {
   };
   
   let myp5 = new p5(s, "sketch");
-
-  
