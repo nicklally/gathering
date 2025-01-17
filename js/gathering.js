@@ -7,120 +7,127 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
-    // built with help from https://gist.github.com/tyrasd/45e4a6a44c734497e82ccaae16a9c9ea
-    function buildOverpassApiUrl(map, overpassQuery) {
-        var bounds = map.getBounds().getSouth() + ',' + map.getBounds().getWest() + ',' + map.getBounds().getNorth() + ',' + map.getBounds().getEast();
-        var nodeQuery = 'node[' + overpassQuery + '](' + bounds + ');';
-        var wayQuery = 'way[' + overpassQuery + '](' + bounds + ');';
-        var relationQuery = 'relation[' + overpassQuery + '](' + bounds + ');';
-        var query = '?data=[out:json][timeout:15];(' + nodeQuery + wayQuery + relationQuery + ');out body geom;';
-        var baseUrl = 'https://overpass-api.de/api/interpreter';
-        var resultUrl = baseUrl + query;
-        return resultUrl;
+// built with help from https://gist.github.com/tyrasd/45e4a6a44c734497e82ccaae16a9c9ea
+function buildOverpassApiUrl(map, overpassQuery) {
+  var bounds = map.getBounds().getSouth() + ',' + map.getBounds().getWest() + ',' + map.getBounds().getNorth() + ',' + map.getBounds().getEast();
+  var nodeQuery = 'node[' + overpassQuery + '](' + bounds + ');';
+  var wayQuery = 'way[' + overpassQuery + '](' + bounds + ');';
+  var relationQuery = 'relation[' + overpassQuery + '](' + bounds + ');';
+  var query = '?data=[out:json][timeout:15];(' + nodeQuery + wayQuery + relationQuery + ');out body geom;';
+  var baseUrl = 'https://overpass-api.de/api/interpreter';
+  var resultUrl = baseUrl + query;
+  return resultUrl;
+}
+
+async function OSMquery () {
+  var queryTextfieldValue = document.getElementById("query-textfield").value;
+  var overpassApiUrl = buildOverpassApiUrl(map, queryTextfieldValue);
+  const response = await fetch(overpassApiUrl);
+  const osmDataJson = await response.json();
+  //console.log(osmDataJson);
+  resultAsGeojson = osmtogeojson(osmDataJson);
+  addGeoJSON(resultAsGeojson);
+};
+
+function addGeoJSON(gjData){
+  console.log(typeof(gjData));
+  if(typeof(gjData) === "string"){
+    gjData = JSON.parse(gjData);
+  }
+  resultAsGeojson = gjData; //need to make resultAsGeojson not a global var
+    var resultLayer = L.geoJson(gjData, {
+      style: function (feature) {
+        return {color: "#ff0000"};
+      },
+      filter: function (feature, layer) {
+        var isPolygon = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon") || (feature.geometry.type === "LineString");
+        if (isPolygon) {
+          return true;
+        }
+        //return true;
+      },
+      onEachFeature: function (feature, layer) {
+        /*var popupContent = "";
+        popupContent = popupContent + "<dt>@id</dt><dd>" + feature.properties.type + "/" + feature.properties.id + "</dd>";
+        var keys = Object.keys(feature.properties.tags);
+        keys.forEach(function (key) {
+          popupContent = popupContent + "<dt>" + key + "</dt><dd>" + feature.properties.tags[key] + "</dd>";
+        });
+        popupContent = popupContent + "</dl>"
+        layer.bindPopup(popupContent);*/
       }
+    }).addTo(map);
+};
 
-      async function OSMquery () {
-        var queryTextfieldValue = document.getElementById("query-textfield").value;
-        var overpassApiUrl = buildOverpassApiUrl(map, queryTextfieldValue);
-     // replace jquery https://youmightnotneedjquery.com/   
-        const response = await fetch(overpassApiUrl);
-        const osmDataJson = await response.json();
-        //console.log(osmDataJson);
-          resultAsGeojson = osmtogeojson(osmDataJson);
-          //console.log(resultAsGeojson);
-          var resultLayer = L.geoJson(resultAsGeojson, {
-            style: function (feature) {
-              return {color: "#ff0000"};
-            },
-            filter: function (feature, layer) {
-              var isPolygon = (feature.geometry) && (feature.geometry.type !== undefined) && (feature.geometry.type === "Polygon") || (feature.geometry.type === "LineString");
-              if (isPolygon) {
-               return true;
-              }
-              //return true;
-            },
-            onEachFeature: function (feature, layer) {
-              var popupContent = "";
-              popupContent = popupContent + "<dt>@id</dt><dd>" + feature.properties.type + "/" + feature.properties.id + "</dd>";
-              var keys = Object.keys(feature.properties.tags);
-              keys.forEach(function (key) {
-                popupContent = popupContent + "<dt>" + key + "</dt><dd>" + feature.properties.tags[key] + "</dd>";
-              });
-              popupContent = popupContent + "</dl>"
-              layer.bindPopup(popupContent);
-            }
-          }).addTo(map);
-      };
+function downloadSVG(){
+  //console.log(resultAsGeojson);
+  var resultAsGeojsonProj = reproject(resultAsGeojson);
 
-      function downloadSVG(){
-        //console.log(resultAsGeojson);
-        var resultAsGeojsonProj = reproject(resultAsGeojson);
+  //console.log(resultAsGeojsonProj);
+  var svgOptions = new Object();
+  //svgOptions.mapExtent = "left: " + map.getBounds().getWest() + ", bottom: " + map.getBounds().getSouth() + ", right: " + map.getBounds().getEast() + ", top: " + map.getBounds().getNorth();
+  //svgOptions.vpSize = "width: " + document.getElementById("map").offsetWidth + ", height: " + document.getElementById("map").offsetHeight;
+  //console.log(svgOptions);
 
-        //console.log(resultAsGeojsonProj);
-        var svgOptions = new Object();
-        //svgOptions.mapExtent = "left: " + map.getBounds().getWest() + ", bottom: " + map.getBounds().getSouth() + ", right: " + map.getBounds().getEast() + ", top: " + map.getBounds().getNorth();
-        //svgOptions.vpSize = "width: " + document.getElementById("map").offsetWidth + ", height: " + document.getElementById("map").offsetHeight;
-        //console.log(svgOptions);
-
-        //load bounds into a geojson only to reproject—needs clean up 
-    var gsEx = 
+  //load bounds into a geojson only to reproject—needs clean up 
+var gsEx = 
+{
+  "type": "FeatureCollection",
+  "features": [
     {
-        "type": "FeatureCollection",
-        "features": [
-          {
-            "type": "Feature",
-            "properties": {},
-            "geometry": {
-              "coordinates": [],
-              "type": "Point"
-            }
-          },
-          {
-            "type": "Feature",
-            "properties": {},
-            "geometry": {
-              "coordinates": [],
-              "type": "Point"
-            }
-          }
-        ]
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
       }
-
-    gsEx.features[0].geometry.coordinates = [map.getBounds().getWest(),map.getBounds().getSouth()];
-    gsEx.features[1].geometry.coordinates = [map.getBounds().getEast(),map.getBounds().getNorth()];
-    var gsEx2 = reproject(gsEx);
-
-        var mapExtents = new Object();
-            mapExtents.left = gsEx2.features[0].geometry.coordinates[0];
-            mapExtents.bottom = gsEx2.features[0].geometry.coordinates[1];
-            mapExtents.right = gsEx2.features[1].geometry.coordinates[0]; 
-            mapExtents.top = gsEx2.features[1].geometry.coordinates[1];
-        svgOptions.mapExtent = mapExtents; 
-        console.log(mapExtents);
-        var vpSize = new Object();
-            vpSize.width = document.getElementById("map").offsetWidth;
-            vpSize.height = document.getElementById("map").offsetHeight;
-        svgOptions.viewportSize = vpSize;
-        
-        //console.log(svgOptions);
-        var converter = new GeoJSON2SVG(svgOptions);
-        var svgConv = converter.convert(resultAsGeojsonProj);
-
-        var mapW = document.getElementById("map").offsetWidth;
-        var mapH = document.getElementById("map").offsetHeight;
-        
-        var svgPre = "<svg version=\"1.1\" width=\"" + mapW + "\" height=\"" + mapH + "\" xmlns=\"http://www.w3.org/2000/svg\"><style>path{fill: none;stroke:gray;stroke-width:0.5px;}</style>"
-        var svgPost = "</svg>";
-        svgOut = svgPre + svgConv + svgPost; 
-        //console.log(svgOut);
-
-        const blob = new Blob([svgOut.toString()]);
-        const element = document.createElement("a");
-        element.download = "output.svg";
-        element.href = window.URL.createObjectURL(blob);
-        element.click();
-        element.remove();
+    },
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
       }
+    }
+  ]
+}
+
+gsEx.features[0].geometry.coordinates = [map.getBounds().getWest(),map.getBounds().getSouth()];
+gsEx.features[1].geometry.coordinates = [map.getBounds().getEast(),map.getBounds().getNorth()];
+var gsEx2 = reproject(gsEx);
+
+  var mapExtents = new Object();
+      mapExtents.left = gsEx2.features[0].geometry.coordinates[0];
+      mapExtents.bottom = gsEx2.features[0].geometry.coordinates[1];
+      mapExtents.right = gsEx2.features[1].geometry.coordinates[0]; 
+      mapExtents.top = gsEx2.features[1].geometry.coordinates[1];
+  svgOptions.mapExtent = mapExtents; 
+  console.log(mapExtents);
+  var vpSize = new Object();
+      vpSize.width = document.getElementById("map").offsetWidth;
+      vpSize.height = document.getElementById("map").offsetHeight;
+  svgOptions.viewportSize = vpSize;
+  
+  //console.log(svgOptions);
+  var converter = new GeoJSON2SVG(svgOptions);
+  var svgConv = converter.convert(resultAsGeojsonProj);
+
+  var mapW = document.getElementById("map").offsetWidth;
+  var mapH = document.getElementById("map").offsetHeight;
+  
+  var svgPre = "<svg version=\"1.1\" width=\"" + mapW + "\" height=\"" + mapH + "\" xmlns=\"http://www.w3.org/2000/svg\"><style>path{fill: none;stroke:gray;stroke-width:0.5px;}</style>"
+  var svgPost = "</svg>";
+  svgOut = svgPre + svgConv + svgPost; 
+  //console.log(svgOut);
+
+  const blob = new Blob([svgOut.toString()]);
+  const element = document.createElement("a");
+  element.download = "output.svg";
+  element.href = window.URL.createObjectURL(blob);
+  element.click();
+  element.remove();
+}
 
 function lockMap(obj){
     if(!obj.checked){
@@ -210,6 +217,26 @@ function loadP5(){
         shapeArr.push(shapeCoords);
     }
 }
+
+function readSingleFile(e) {
+  var file = e.target.files[0];
+  if (!file) {
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var contents = e.target.result;
+    addGeoJSON(contents);
+  };
+  reader.readAsText(file);
+}
+
+function displayContents(contents) {
+  var element = document.getElementById('file-content');
+  element.textContent = contents;
+}
+
+document.getElementById('file-input').addEventListener('change', readSingleFile, false);
 
 // PROCESSING SKETCH CODE
 const s = ( p ) => {

@@ -21,17 +21,27 @@
 <div id="sketch"></div>
 
 <div id="menuEdit" class="menu">
-  <header>TOOLS</header>
-
+  <header>Search</header>
+  <hr />
   <input id="query-textfield" value="building" size="250">
   <input id="query-button" type="button" value="Search OSM" onclick="OSMquery();">
+  <br /><br /><br /><br />
 
-<br /><br />
-  <button title="Download SVG" onclick="downloadSVG();">Export SVG</button><br />
+  <header>Import GeoJSON</header>
+  <hr />
+  <input type="file" id="file-input" />
+  <br /><br /><br /><br />
 
+  <header>Map Controls</header>
+  <hr />
+  <input type="checkbox" name="lock" onchange="lockMap(this)" unchecked>Lock map
   <br /><br />
 
-  <input type="checkbox" name="lock" onchange="lockMap(this)" unchecked>Lock map
+  <header>Export</header>
+  <hr />
+
+  <button title="Download SVG" onclick="downloadSVG();">Export SVG</button><br />
+
   <br /><br />
 
 </div>
